@@ -32,7 +32,7 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
-
+// Autocomplete endpoint
 app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   try {
       // External API URL
@@ -44,17 +44,13 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
           return res.status(400).json({ error: 'Missing required parameter: input' });
       }
 
-      // Google Places API Key
-      const apiKey = GOOGLE_API_KEY;
-
       // Make the API request
       const response = await axios.get(apiUrl, {
           params: {
               input: input,
-              key: apiKey, // API Key
+              key: GOOGLE_API_KEY, // API Key
           },
       });
-
       // Return the API's response to the client
       res.status(response.status).json(response.data);
   } catch (error) {
@@ -64,6 +60,40 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
           details: error.message,
       });
   }
+});
+
+// Route Endpoint
+app.get('/api/route', verifyFirebaseToken, async (req, res) => {
+    console.log("route called");
+    try {
+        // Get parameters from the client request
+        const { origin, destination, mode } = req.query;
+
+        // Validate required parameters
+        if (!origin || !destination || !mode) {
+            return res.status(400).json({ error: 'Missing required parameters: origin, destination, or mode' });
+        }
+
+        // Google Directions API URL
+        const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                origin,              // Origin in "latitude,longitude" format
+                destination,         // Destination in "latitude,longitude" format
+                mode,                // Mode of transportation (driving, walking, etc.)
+                alternatives: true,  // Request alternative routes
+                key: GOOGLE_API_KEY, // Your Google API key
+            },
+        });
+
+        // Send back the response from Google Directions API to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching directions:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching directions' });
+    }
 });
 
 // Status endpoint
