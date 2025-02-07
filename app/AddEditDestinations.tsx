@@ -316,13 +316,7 @@ const AddEditDestinations = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
-                        if (destinations.length > 0) {
-                            router.push("/GenerateItineraryScreen")
-                        } else {
-                            alert("You must add at least 1 destination.")
-                        }
-                    }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { router.push("/GenerateItineraryScreen") }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
             </View>
