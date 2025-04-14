@@ -77,53 +77,98 @@ async function getDistanceMatrix(origin, destinations, mode) {
 // Optimal Route Main Function
 export async function calculateOptimalRoute(locations, origin, mode) {
     try {
-        const optimalRoute = [];
-        let currentOrigin = origin;
-    
-        const length = locations.length;
-        console.log("Locations Length: " + length);
-        for (let i = 0; i < length; i++) {
-            console.log(locations);
-            // Get the distance matrix for the current origin and remaining locations
-            let distancesList;
-            try {
-                distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
-            } catch (error){
-                console.log("Error occured in DistanceMatrix: ", error);
-                throw new Error(error);
+        const allLocations = [origin, ...locations];
+        const distanceMatrix = await getFullDistanceMatrix(allLocations, mode);
+
+        // Start at the Origin
+        let route = [0];
+        const n = allLocations.length;
+        const unvisited = new Set([...Array(n).keys()].slice(1)); // skip origin
+
+        // Nearest Neighbor to Get Initial Route
+        let currentIndex = 0;
+        while (unvisited.size > 0) {
+            let nextIndex = null;
+            let minDistance = Infinity;
+
+            for (let i of unvisited) {
+                const dist = distanceMatrix[currentIndex][i].distance;
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    nextIndex = i;
+                }
             }
 
-    
-            // Find the destination with the minimum distance
-            // TODO: Based on user input, whether it's distance or duration
-            const destination = distancesList.reduce((prev, current) => (prev.distance < current.distance ? prev : current));
-    
-            // Add the current origin and destination to the route
-            optimalRoute.push([
-                [currentOrigin.name, currentOrigin.address, currentOrigin.duration, currentOrigin.priority],
-                [destination.originalLocationName, destination.destinationAddress, destination.duration, destination.priority]
-            ]);         
-    
-            // Update the current origin to the chosen destination
-            currentOrigin = { name: destination.originalLocationName, address: destination.destinationAddress };
-    
-            //console.log("To remove: ", currentOrigin);
-    
-            // Remove the destination from the list of locations
-            const destinationIndex = locations.findIndex(loc => loc.name === destination.originalLocationName);
-            if (destinationIndex !== -1) {
-                locations.splice(destinationIndex, 1); // Remove the matched destination
-            } else {
-                console.log("Destination not found in locations array");
+            if (nextIndex !== null) {
+                route.push(nextIndex);
+                unvisited.delete(nextIndex);
+                currentIndex = nextIndex;
             }
         }
-        console.log("End");
-    
+
+        // 2-opt Optimization to Improve the Route
+        route = optimize2Opt(route, distanceMatrix);
+
+        // Format the final route
+        const optimalRoute = [];
+        for (let i = 0; i < route.length - 1; i++) {
+            const from = allLocations[route[i]];
+            const to = allLocations[route[i + 1]];
+            const matrixEntry = distanceMatrix[route[i]][route[i + 1]];
+            optimalRoute.push([
+                [from.name, from.address, matrixEntry.duration, from.priority],
+                [to.name, to.address, matrixEntry.duration, to.priority]
+            ]);
+        }
+
         return optimalRoute;
     } catch (error) {
-        console.log("Error occured in OptimalRoute.js: ", error);
+        console.log("Error in calculateOptimalRoute:", error);
         throw new Error(error);
     }
+}
+
+// Fetch full distance matrix for all locations
+async function getFullDistanceMatrix(locations, mode) {
+    const matrix = [];
+    for (let i = 0; i < locations.length; i++) {
+        const row = await getDistanceMatrix(locations[i], locations, mode);
+        matrix.push(row);
+    }
+    return matrix;
+}
+
+// 2-Opt Optimization: Swaps segments to reduce route length
+function optimize2Opt(route, matrix) {
+    let improved = true;
+    while (improved) {
+        improved = false;
+        for (let i = 1; i < route.length - 2; i++) {
+            for (let j = i + 1; j < route.length - 1; j++) {
+                const newRoute = route.slice();
+                // Swap two edges
+                newRoute.splice(i, j - i + 1, ...route.slice(i, j + 1).reverse());
+
+                const oldDist = getTotalDistance(route, matrix);
+                const newDist = getTotalDistance(newRoute, matrix);
+
+                if (newDist < oldDist) {
+                    route = newRoute;
+                    improved = true;
+                }
+            }
+        }
+    }
+    return route;
+}
+
+// Calculate total route distance
+function getTotalDistance(route, matrix) {
+    let total = 0;
+    for (let i = 0; i < route.length - 1; i++) {
+        total += matrix[route[i]][route[i + 1]].distance;
+    }
+    return total;
 }
 
 
