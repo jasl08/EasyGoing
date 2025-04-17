@@ -257,21 +257,7 @@ const GenerateItineraryScreen = () => {
                     let result;
                     console.log("Do we optimize (checked again)? The answer is:", optimizeCheck);
                     if (optimizeCheck) {
-                        // Calculate the number of days
-                        let numberOfDays;
-                        try {
-                        if (startDate && endDate) {
-                            const actualEndDate = new Date(endDate);
-                            const actualStartDate = new Date(startDate);
-                            numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
-                        } else {
-                            numberOfDays = 7; // Default 7 days
-                        }
-                        } catch (error) {
-                        console.log("Error in Date", error);
-                        }
-                        console.log("Number of days calculated.");
-                        result = await calculateOptimalRouteHac(simplifiedDestinations, origin, mode, numberOfDays);
+                        result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
                     } else {
                         // No optimize
                         result = formatRouteInOrder(simplifiedDestinations, origin);
