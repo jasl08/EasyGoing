@@ -4,7 +4,7 @@ import { getDistanceMatrix } from './optimalRoute.js';
 // const route = await calculateOptimalRoute(locations, origin, "driving", days);
 
 // New Optimal Route Main Function (Centerted Around HAC)
-export async function calculateOptimalRoute(locations, origin, mode, numDays = 2) {
+export async function calculateOptimalRouteHac(locations, origin, mode, numDays = 7) {
     try {
         const allLocations = [...locations];
         const coords = allLocations.map(loc => [loc.latitude, loc.longitude]);

@@ -3,7 +3,7 @@ import {getIdToken} from '../scripts/getFirebaseID'
 import { auth } from '@/firebaseConfig';
 
 // Distance Matrix API
-async function getDistanceMatrix(origin, destinations, mode) {
+export async function getDistanceMatrix(origin, destinations, mode) {
     const url = 'https://ezgoing.app/api/distancematrix';
     // Log the destinations array converted to a string
     const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
