@@ -1,5 +1,6 @@
 # Easy Going
 **A Smart Trip Planning App for Stress-Free Travel**
+
 ![easygoing](easygoing.jpg)
 
 ## Overview  
