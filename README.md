@@ -1,5 +1,6 @@
 # Easy Going
 **A Smart Trip Planning App for Stress-Free Travel**
+![easygoing](easygoing.pdf)
 
 ## Overview  
 Easy Going is a full-stack trip planning application that helps users plan, manage, and budget for trips. It features AI-powered recommendations, a budgeting system, and intelligent photo caching to reduce external API calls. Designed with simplicity and scalability in mind, it runs across modern browsers and mobile devices using a Node.js backend and a React Native frontend.
